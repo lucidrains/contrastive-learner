@@ -85,6 +85,24 @@ for _ in range(100):
     opt.step()
 ```
 
+By default, this will use the augmentations recommended in the SimCLR paper, mainly color jitter, gaussian blur, and random resize crop. However, if you would like to specify your own augmentations, you can simply pass in a `augment_fn` in the constructor. Augmentations must work in the tensor space. If you decide to use torchvision augmentations, make sure the function converts first to PIL `.toPILImage()` and then back to tensors `.ToTensor()`
+
+```
+augment = nn.Sequential(
+    kornia.augmentations.RandomHorizontalFlip()
+)
+
+learner = ContrastiveLearner(
+    resnet,
+    image_size = 256,
+    hidden_layer_index = -2,
+    project_hidden = True,
+    project_dim = 128,
+    use_nt_xent_loss = True,
+    augment_fn = augment
+)
+```
+
 ## Citations
 
 ```bibtex

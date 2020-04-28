@@ -8,6 +8,14 @@ This is a simple to use Pytorch wrapper to enable contrastive self-supervised le
 
 You can wrap any neural network that accepts a visual input, be it a resnet, policy network, or the discriminator of a GAN. The rest is taken care of.
 
+## Install
+
+```bash
+$ pip install contrastive-learner
+```
+
+## Usage
+
 ```python
 # SimCLR style
 import torch

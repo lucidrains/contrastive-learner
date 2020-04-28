@@ -18,8 +18,9 @@ $ pip install contrastive-learner
 
 ## Usage
 
+SimCLR (projection head with normalized temperature-scaled cross-entropy loss)
+
 ```python
-# SimCLR style
 import torch
 from contrastive_learner import ContrastiveLearner
 from torchvision import models
@@ -29,11 +30,12 @@ resnet = models.resnet50(pretrained=True)
 learner = ContrastiveLearner(
     resnet,
     image_size = 256,
-    hidden_layer_index = -2,
-    project_hidden = True,
-    project_dim = 128,
-    use_nt_xent_loss = True,
-    augment_both = True
+    hidden_layer_index = -2,   # layer where output is hidden dimension
+    project_hidden = True,     # use projection head
+    project_dim = 128,         # projection head dimensions, 128 from paper
+    use_nt_xent_loss = True,   # the above mentioned loss, abbreviated
+    temperature = 0.1,         # temperature
+    augment_both = True        # augment both query and key
 )
 
 opt = torch.optim.Adam(learner.parameters(), lr=3e-4)
@@ -50,8 +52,9 @@ for _ in range(100):
 
 ```
 
+CURL (with momentum averaged key encoder)
+
 ```python
-# CURL style
 import torch
 from contrastive_learner import ContrastiveLearner
 from torchvision import models
@@ -62,11 +65,12 @@ learner = ContrastiveLearner(
     resnet,
     image_size = 256,
     hidden_layer_index = -2,
-    use_momentum = True,
+    use_momentum = True,         # use momentum for key encoder
     momentum_value = 0.999,
-    project_hidden = False,
-    use_bilinear = True,
-    use_nt_xent_loss = False
+    project_hidden = False,      # no projection heads
+    use_bilinear = True,         # in paper, logits is bilinear product of query / key
+    use_nt_xent_loss = False,    # use regular contrastive loss
+    augment_both = False         # in curl, only the key is augmented
 )
 
 opt = torch.optim.Adam(learner.parameters(), lr=3e-4)
@@ -80,7 +84,7 @@ for _ in range(100):
     opt.zero_grad()
     loss.backward()
     opt.step()
-    learner.update_moving_average()
+    learner.update_moving_average() # update moving average of key encoder
 ```
 
 ## Advanced

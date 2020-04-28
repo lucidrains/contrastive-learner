@@ -41,13 +41,14 @@ def singleton(cache_key):
 
 # losses
 
-def contrastive_loss(queries, keys):
+def contrastive_loss(queries, keys, temperature = 0.1):
     b, device = queries.shape[0], queries.device
     logits = queries @ keys.t()
     logits = logits - logits.max(dim=-1, keepdim=True).values
+    logits /= temperature
     return F.cross_entropy(logits, torch.arange(b, device=device))
 
-def nt_xent_loss(queries, keys):
+def nt_xent_loss(queries, keys, temperature = 0.1):
     b, device = queries.shape[0], queries.device
 
     n = b * 2
@@ -56,8 +57,9 @@ def nt_xent_loss(queries, keys):
 
     mask = torch.eye(n, device=device).bool()
     logits = logits[~mask].reshape(n, n - 1)
-    labels = torch.cat(((torch.arange(b) + b - 1), torch.arange(b)), dim=0)
+    logits /= temperature
 
+    labels = torch.cat(((torch.arange(b) + b - 1), torch.arange(b)), dim=0)
     loss = F.cross_entropy(logits, labels, reduction='sum')
     loss /= 2 * (b - 1)
     return loss
@@ -121,7 +123,7 @@ class OutputHiddenLayer(nn.Module):
 # main class
 
 class ContrastiveLearner(nn.Module):
-    def __init__(self, net, image_size, hidden_layer_index=-2, project_hidden = True, project_dim=128, augment_both=True, use_nt_xent_loss=False, augment_fn = None, use_bilinear = False, use_momentum = False, momentum_value = 0.999, key_encoder = None):
+    def __init__(self, net, image_size, hidden_layer_index=-2, project_hidden = True, project_dim=128, augment_both=True, use_nt_xent_loss=False, augment_fn = None, use_bilinear = False, use_momentum = False, momentum_value = 0.999, key_encoder = None, temperature = 0.1):
         super().__init__()
         self.net = OutputHiddenLayer(net, layer=hidden_layer_index)
 
@@ -136,6 +138,8 @@ class ContrastiveLearner(nn.Module):
         self.augment = default(augment_fn, DEFAULT_AUG)
 
         self.augment_both = augment_both
+
+        self.temperature = temperature
         self.use_nt_xent_loss = use_nt_xent_loss
 
         self.project_hidden = project_hidden
@@ -186,7 +190,7 @@ class ContrastiveLearner(nn.Module):
     def calculate_loss(self):
         assert self.queries is not None and self.keys is not None, 'no queries or keys accumulated'
         loss_fn = nt_xent_loss if self.use_nt_xent_loss else contrastive_loss
-        loss = loss_fn(self.queries, self.keys)
+        loss = loss_fn(self.queries, self.keys, temperature = self.temperature)
         self.queries = self.keys = None
         return loss
 

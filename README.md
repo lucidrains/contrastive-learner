@@ -20,7 +20,8 @@ learner = ContrastiveLearner(
     hidden_layer_index = -2,
     project_hidden = True,
     project_dim = 128,
-    use_nt_xent_loss = True
+    use_nt_xent_loss = True,
+    augment_both = True
 )
 
 opt = torch.optim.Adam(learner.parameters(), lr=3e-4)
@@ -87,8 +88,8 @@ for _ in range(100):
 
 By default, this will use the augmentations recommended in the SimCLR paper, mainly color jitter, gaussian blur, and random resize crop. However, if you would like to specify your own augmentations, you can simply pass in a `augment_fn` in the constructor. Augmentations must work in the tensor space. If you decide to use torchvision augmentations, make sure the function converts first to PIL `.toPILImage()` and then back to tensors `.ToTensor()`
 
-```
-augment = nn.Sequential(
+```python
+custom_augment_fn = nn.Sequential(
     kornia.augmentations.RandomHorizontalFlip()
 )
 
@@ -99,7 +100,7 @@ learner = ContrastiveLearner(
     project_hidden = True,
     project_dim = 128,
     use_nt_xent_loss = True,
-    augment_fn = augment
+    augment_fn = custom_augment_fn
 )
 ```
 

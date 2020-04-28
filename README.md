@@ -2,6 +2,8 @@
 
 # Contrastive learning in Pytorch, made simple
 
+[![PyPI version](https://badge.fury.io/py/contrastive-learner.svg)](https://badge.fury.io/py/contrastive-learner)
+
 It seems we have lift-off for self-supervised learning on images.
 
 This is a simple to use Pytorch wrapper to enable contrastive self-supervised learning on any visual neural network. At the moment, it contains enough settings for one to train on either of the schemes used in SimCLR or CURL.
@@ -19,7 +21,7 @@ $ pip install contrastive-learner
 ```python
 # SimCLR style
 import torch
-from contrastive_learner.contrastive_learner import ContrastiveLearner
+from contrastive_learner import ContrastiveLearner
 from torchvision import models
 
 resnet = models.resnet50(pretrained=True)
@@ -51,7 +53,7 @@ for _ in range(100):
 ```python
 # CURL style
 import torch
-from contrastive_learner.contrastive_learner import ContrastiveLearner
+from contrastive_learner import ContrastiveLearner
 from torchvision import models
 
 resnet = models.resnet50(pretrained=True)

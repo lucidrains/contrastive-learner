@@ -1,3 +1,5 @@
+<img src="./diagram.png" width="450px"/>
+
 # Contrastive learning in Pytorch, made simple
 
 It seems we have lift-off for self-supervised learning on images.

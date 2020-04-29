@@ -165,18 +165,18 @@ class ContrastiveLearner(nn.Module):
 
     @singleton('bilinear_w')
     def _get_bilinear(self, hidden):
-        _, dim, device = *hidden.shape, hidden.device
-        return nn.Parameter(torch.eye(dim, device=device)).to(device)
+        _, dim = hidden.shape
+        return nn.Parameter(torch.eye(dim, device=device, dtype=dtype)).to(hidden)
 
     @singleton('projection')
     def _get_projection_fn(self, hidden):
-        _, dim, device = *hidden.shape, hidden.device
+        _, dim = hidden.shape
 
         return nn.Sequential(
             nn.Linear(dim, dim, bias = False),
             nn.LeakyReLU(inplace=True),
             nn.Linear(dim, self.project_dim, bias = False)
-        ).to(device)
+        ).to(hidden)
 
     def reset_moving_average(self):
         assert self.use_momentum, 'must be using momentum method for key encoder'

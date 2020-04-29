@@ -59,7 +59,7 @@ def nt_xent_loss(queries, keys, temperature = 0.1):
     logits = logits[~mask].reshape(n, n - 1)
     logits /= temperature
 
-    labels = torch.cat(((torch.arange(b) + b - 1), torch.arange(b)), dim=0)
+    labels = torch.cat(((torch.arange(b, device=device) + b - 1), torch.arange(b, device=device)), dim=0)
     loss = F.cross_entropy(logits, labels, reduction='sum')
     loss /= 2 * (b - 1)
     return loss
@@ -99,7 +99,6 @@ class OutputHiddenLayer(nn.Module):
     def __init__(self, net, layer=-2):
         super().__init__()
         self.net = net
-        self.children = [*self.net.children()]
         self.layer = layer
 
         self.hidden = None
@@ -109,7 +108,8 @@ class OutputHiddenLayer(nn.Module):
         def hook(_, __, output):
             self.hidden = output
 
-        handle = self.children[self.layer].register_forward_hook(hook)
+        children = [*self.net.children()]
+        handle = children[self.layer].register_forward_hook(hook)
 
     def forward(self, x):
         if self.layer == -1:
@@ -166,17 +166,17 @@ class ContrastiveLearner(nn.Module):
     @singleton('bilinear_w')
     def _get_bilinear(self, hidden):
         _, dim, device = *hidden.shape, hidden.device
-        return nn.Parameter(torch.eye(dim, device=device))
+        return nn.Parameter(torch.eye(dim, device=device)).to(device)
 
     @singleton('projection')
     def _get_projection_fn(self, hidden):
-        _, dim = hidden.shape
+        _, dim, device = *hidden.shape, hidden.device
 
         return nn.Sequential(
             nn.Linear(dim, dim, bias = False),
             nn.LeakyReLU(inplace=True),
             nn.Linear(dim, self.project_dim, bias = False)
-        )
+        ).to(device)
 
     def reset_moving_average(self):
         assert self.use_momentum, 'must be using momentum method for key encoder'

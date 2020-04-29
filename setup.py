@@ -2,7 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
   name = 'contrastive_learner',
-  version = '0.0.5',
+  packages = find_packages(),
+  version = '0.0.6',
   license='MIT',
   description = 'Self-supervised contrastive learning made simple',
   author = 'Phil Wang',

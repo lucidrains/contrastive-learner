@@ -157,6 +157,9 @@ class ContrastiveLearner(nn.Module):
         self.queries = None
         self.keys = None
 
+        # send a mock image tensor to instantiate parameters
+        self.forward(torch.randn(1, 3, image_size, image_size))
+
     @singleton('key_encoder')
     def _get_key_encoder(self):
         key_encoder = copy.deepcopy(self.net)

@@ -96,7 +96,7 @@ def update_moving_average(ema_updater, ma_model, current_model):
 # hidden layer extractor class
 
 class OutputHiddenLayer(nn.Module):
-    def __init__(self, net, layer=-2):
+    def __init__(self, net, layer = -2):
         super().__init__()
         self.net = net
         self.layer = layer
@@ -104,12 +104,22 @@ class OutputHiddenLayer(nn.Module):
         self.hidden = None
         self._register_hook()
 
+    def _find_layer(self):
+        if type(self.layer) == str:
+            modules = dict([*self.net.named_modules()])
+            return modules.get(self.layer, None)
+        elif type(self.layer) == int:
+            children = [*self.net.children()]
+            return children[self.layer]
+        return None
+
     def _register_hook(self):
         def hook(_, __, output):
             self.hidden = output
 
-        children = [*self.net.children()]
-        handle = children[self.layer].register_forward_hook(hook)
+        layer = self._find_layer()
+        assert layer is not None, f'hidden layer ({self.layer}) not found'
+        handle = layer.register_forward_hook(hook)
 
     def forward(self, x):
         if self.layer == -1:
@@ -118,14 +128,15 @@ class OutputHiddenLayer(nn.Module):
         _ = self.net(x)
         hidden = self.hidden
         self.hidden = None
+        assert hidden is not None, f'hidden layer {self.layer} never emitted an output'
         return hidden
 
 # main class
 
 class ContrastiveLearner(nn.Module):
-    def __init__(self, net, image_size, hidden_layer_index=-2, project_hidden = True, project_dim=128, augment_both=True, use_nt_xent_loss=False, augment_fn = None, use_bilinear = False, use_momentum = False, momentum_value = 0.999, key_encoder = None, temperature = 0.1):
+    def __init__(self, net, image_size, hidden_layer = -2, project_hidden = True, project_dim=128, augment_both=True, use_nt_xent_loss=False, augment_fn = None, use_bilinear = False, use_momentum = False, momentum_value = 0.999, key_encoder = None, temperature = 0.1):
         super().__init__()
-        self.net = OutputHiddenLayer(net, layer=hidden_layer_index)
+        self.net = OutputHiddenLayer(net, layer=hidden_layer)
 
         DEFAULT_AUG = nn.Sequential(
             RandomApply(augs.ColorJitter(0.8, 0.8, 0.8, 0.2), p=0.8),

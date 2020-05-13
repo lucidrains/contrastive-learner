@@ -30,7 +30,7 @@ resnet = models.resnet50(pretrained=True)
 learner = ContrastiveLearner(
     resnet,
     image_size = 256,
-    hidden_layer_index = -2,   # layer where output is hidden dimension
+    hidden_layer = 'avgpool',  # layer name where output is hidden dimension. this can also be an integer specifying the index of the child
     project_hidden = True,     # use projection head
     project_dim = 128,         # projection head dimensions, 128 from paper
     use_nt_xent_loss = True,   # the above mentioned loss, abbreviated

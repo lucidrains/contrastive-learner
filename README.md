@@ -64,7 +64,7 @@ resnet = models.resnet50(pretrained=True)
 learner = ContrastiveLearner(
     resnet,
     image_size = 256,
-    hidden_layer_index = -2,
+    hidden_layer = 'avgpool',
     use_momentum = True,         # use momentum for key encoder
     momentum_value = 0.999,
     project_hidden = False,      # no projection heads
@@ -112,7 +112,7 @@ custom_augment_fn = nn.Sequential(
 learner = ContrastiveLearner(
     resnet,
     image_size = 256,
-    hidden_layer_index = -2,
+    hidden_layer = -2,
     project_hidden = True,
     project_dim = 128,
     use_nt_xent_loss = True,

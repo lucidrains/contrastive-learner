@@ -10,6 +10,10 @@ This is a simple to use Pytorch wrapper to enable contrastive self-supervised le
 
 You can wrap any neural network that accepts a visual input, be it a resnet, policy network, or the discriminator of a GAN. The rest is taken care of.
 
+## Issues
+
+It has surfaced that the results of CURL are <a href="https://www.reddit.com/r/MachineLearning/comments/grnz0d/d_issues_reproducing_curl_algorithm_seems_broken/">not reproducible</a>. It is recommended that you go with the SimCLR settings until further notice.
+
 ## Install
 
 ```bash
